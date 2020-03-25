@@ -11,28 +11,28 @@ LFSR init_LFSR(_Bool cr[16], _Bool sc[16]){
 }
 
 _Bool filtrage(_Bool F[8], _Bool x0, _Bool x1, _Bool x2){
-  if ((x0 == 0) && (x1 == 0) && (x2==0))
+  if ((x0 == 0) && (x1 == 0) && (x2==0)){
     return F[0];
   }
-  else if ((x0 == 1) && (x1 == 0) && (x2==0))
+  else if ((x0 == 1) && (x1 == 0) && (x2==0)){
     return F[1];
   }
-  else if ((x0 == 0) && (x1 == 1) && (x2==0))
+  else if ((x0 == 0) && (x1 == 1) && (x2==0)){
     return F[2];
   }
-  else if ((x0 == 1) && (x1 == 1) && (x2==0))
+  else if ((x0 == 1) && (x1 == 1) && (x2==0)){
     return F[3];
   }
-  else if ((x0 == 0) && (x1 == 0) && (x2==1))
+  else if ((x0 == 0) && (x1 == 0) && (x2==1)){
     return F[4];
   }
-  else if ((x0 == 1) && (x1 == 0) && (x2==1))
+  else if ((x0 == 1) && (x1 == 0) && (x2==1)){
     return F[5];
   }
-  else if ((x0 == 0) && (x1 == 1) && (x2==1))
+  else if ((x0 == 0) && (x1 == 1) && (x2==1)){
     return F[6];
   }
-  else if ((x0 == 1) && (x1 == 1) && (x2==1))
+  else if ((x0 == 1) && (x1 == 1) && (x2==1)){
     return F[7];
   }
   else{
@@ -62,7 +62,7 @@ _Bool calcul_LFSR(LFSR * l){//POINTEUR car on change la valeurs des l.clef[i]
 
 int main(){
   LFSR L0,L1,L2;
-  int n = 50; // Taille de la suite chiffrante Si
+  int n = 50000; // Taille de la suite chiffrante Si
   _Bool  x0, x1, x2;
   _Bool * tab;
   tab = malloc(sizeof(_Bool)*n);
