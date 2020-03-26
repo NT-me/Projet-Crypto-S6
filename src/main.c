@@ -10,20 +10,19 @@ int main(){
   _Bool k0[16] = {0,1,1,0,1,0,0,0,1,0,1,1,0,1,0,0},
         k1[16] = {0,1,0,1,0,0,0,0,0,0,0,1,0,1,1,1},
         k2[16] = {0,1,0,1,0,0,1,0,1,0,1,1,0,1,0,0};
-//les 3 cléfs (k0,k1,k2)
+// les 3 cléfs (k0,k1,k2)
   _Bool c0[16] = {0,0,0,0,0,0,0,0,1,0,0,1,0,0,1,1},
         c1[16] = {0,0,0,0,1,0,0,0,1,0,0,0,0,0,1,1},
         c2[16] = {0,0,0,0,0,0,0,0,0,0,1,0,1,1,0,1};
-//les 3 coéfficients rétroactifs
+// les 3 coéfficients rétroactifs
   _Bool F[8] = {1,0,0,0,1,1,1,0};
 //              0 1 2 3 4 5 6 7
   L0 = init_LFSR(c0, k0);
   L1 = init_LFSR(c1, k1);
   L2 = init_LFSR(c2, k2);
 
-
   int i;
-
+/*
   for (i=0;i<n;i++){
     x0 = calcul_LFSR(&L0);
     x1 = calcul_LFSR(&L1);
@@ -31,7 +30,8 @@ int main(){
     tab[i] = filtrage(F,x0,x1,x2);
     printf("%d %d %d | %d\n", x0, x1, x2, tab[i]);
   }
-
+*/
+  affiche_cas_filtrage();
   free(tab);//on libère la mémoire
   return 0;
 }
