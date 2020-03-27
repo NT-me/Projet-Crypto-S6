@@ -9,7 +9,7 @@ NOUS ON TRAVAIL AVEC DES BONS GROS BOOLS
 */
 typedef struct lfsr{//Structure représentant le LFSR
   //int ID;
-  _Bool coef_ret[TAILLE];   //coefficient de retroaction
+  _Bool coef_ret[TAILLE];   //coefficient de rétroaction
   _Bool clef[TAILLE]; // contient la suite chiffrante courante
 }LFSR;
 
@@ -25,3 +25,5 @@ _Bool filtrage(_Bool F[8], _Bool x0, _Bool x1, _Bool x2);
 
 // itère pour un lfsr (retourne le x associer au lfsr)
 _Bool calcul_LFSR(LFSR * l);
+
+void affiche_cas_filtrage();
