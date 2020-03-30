@@ -1,14 +1,25 @@
 #include "geffe.h"
 
-LFSR init_LFSR(_Bool cr[16], _Bool sc[16]){
+LFSR init_LFSR(_Bool cr[16], _Bool sdc[16]){
   //initialise un lFSR
   int i;
   LFSR lres;
   for(i=TAILLE-1;i>-1;i--){
     lres.coef_ret[i] = cr[i];
-    lres.clef[i] = sc[i];
+    lres.clef[i] = sdc[i];
   }
   return lres;
+}
+
+CLEF init_clef(_Bool k0[16], _Bool k1[16], _Bool k2[16]){
+  CLEF res;
+  for (int i=0; i<16; ++i){
+    res.k0[i] = k0[i];
+    res.k1[i] = k1[i];
+    res.k2[i] = k2[i];
+  }
+
+  return res;
 }
 
 _Bool filtrage(_Bool F[8], _Bool x0, _Bool x1, _Bool x2){
@@ -112,4 +123,97 @@ _Bool F[8];
     }
   }
 
+}
+
+void attaque_L2(_Bool cr[16], _Bool sc[32], _Bool F[8], _Bool * res){
+  _Bool init_L2[16], tmpSi[32];
+  LFSR tmpL2;
+  int i,j,tmp,nb_similitudes = 0, flag_Break;
+
+  for(i=0;i<pow(2,16);i++){//les 2^16 cas
+    tmp = i;
+    flag_Break = 0
+    for(j=15;j>-1;j--){ // boucle pour convertir un entier i en binaire
+      init_L2[j] = tmp & 0x1 ; //mask avec le dernier bit (0 ou 1), résultat dans tmpL2[j]
+      tmp = tmp >> 1 ;   //shift pour changer de position
+    }
+
+    tmpL2 = init_LFSR(cr,init_L2);
+    for(int lo = 0; lo<32; lo++){
+      tmpSi[lo] = calcul_LFSR(&tmpL2);
+    }
+
+    for(int glace_au_chocolat = 0; glace_au_chocolat<32; ++glace_au_chocolat){ //Compte les similitudes entre la suite chiffrante originelle
+      if(sc[glace_au_chocolat] == tmpSi[glace_au_chocolat]) nb_similitudes ++; //et l'initialisation de L2
+      if(glace_au_chocolat == 24){ // Vérfie si nous en sommes à la 24e itération
+        if(nb_similitudes < 17){ // Si on est a la 24e itération et qu'il y'a moins de 17 similitudes alors on sors.
+          flag_Break = 1;
+          break;
+        }
+      }
+    }
+
+    if((flag_Break == 0) & (((nb_similitudes/32)*100)>75))
+    {
+      for(int h = 0;h < 32; h++)
+        res[h] = init_L2[i];
+        break;
+    }
+  }
+}
+
+void attaque_L0_L1(_Bool cr[16], _Bool sc[32], _Bool F[8], _Bool L2[16], LFSR tmpL0, LFSR tmpL1, LFSR tmpL2){
+  int i,j,k,cmp1 = 0,cmp2=0,tmp;
+  _Bool k0[16],k1[16],k0_sav[16],k1_sav[16];
+
+
+
+  for(i=0;i<16;i++){ // réduction du nombre de cas (environ 25%)
+    if(L2[i] == sc[i]){
+      k0[i] = !sc[i];
+      k0_sav[i] = 1;
+      k1_sav[i] = 1;
+      k1[i] = L2[i];
+      cmp1++;
+      cmp2++;
+    }
+    else {
+      k0_sav[i] = 0;
+      k1_sav[i] = 0;
+    }
+  }
+
+  for(j=0;j<pow(2,16-cmp1);j++){// boucle cas k1
+    tmp = j;
+    for(i=15;i>-1;i--){// création k1
+      if(k1_sav[i] == 0){//si la case i n'est pas initialisé
+        k1[i] = tmp & 0x1 ;
+        tmp = tmp >> 1 ;
+      }
+    }
+    //lfsr 1 et 2
+    for(i=0;i<16;i++){ //reduction des cas pour x0
+      if (k1[i]==L2[i]){
+        k0=sc[i];
+        k0_sav[i] = 1;
+      }
+    }
+    for(i=0;i<pow(2,16-cmp2);i++){ //pour chaque
+      tmp = i;
+      for(k=15;k>-1;k--){ // création de k0
+        if(k0_sav[i] == 0){
+          k0[k] = tmp & 0x1 ;
+          tmp = tmp >> 1 ;
+        }// Extraire Sortie chiffrante et comparaison avec suite chiffrante
+      }
+    }
+  }
+}
+
+CLEF attaque(_Bool cr[16], _Bool sc[32], _Bool F[8]){
+  CLEF res;
+
+  attaque_L2(cr,sc,F,&res.k2); //Recherche de la clé d'initialisation de L2
+
+  return res;
 }

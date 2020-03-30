@@ -5,7 +5,7 @@ int main(){
 
   fichier = fopen("suite_chiffrante.txt", "w");
   LFSR L0,L1,L2;//les 3 LFSR
-  int n = 16; // Taille de la suite chiffrante Si
+  int n = 50; // Taille de la suite chiffrante Si
   _Bool  x0, x1, x2;
   _Bool * tab; //tableau prenant la valeur de retour du filtrage(suite_chiffrante)
   tab = malloc(sizeof(_Bool)*n);
@@ -22,13 +22,18 @@ int main(){
 
   _Bool F[8] = {1,0,0,0,1,1,1,0};
   //            0 1 2 3 4 5 6 7
+
+  CLEF K, K_atk;
+  K = init_clef(k0,k1,k2);
+
   //initialisation des LFSR
-  L0 = init_LFSR(c0, k0);
-  L1 = init_LFSR(c1, k1);
-  L2 = init_LFSR(c2, k2);
+  L0 = init_LFSR(c0, K.k0);
+  L1 = init_LFSR(c1, K.k1);
+  L2 = init_LFSR(c2, K.k2);
+
 
   int i;
-  fprintf(fichier, "y |x0 1 2 \n", tab[i],x2);
+  //fprintf(fichier, "y |x0 1 2 \n", tab[i],x2);
   for (i=0;i<n;i++){
     x0 = calcul_LFSR(&L0);
     x1 = calcul_LFSR(&L1);
@@ -36,13 +41,13 @@ int main(){
     tab[i] = filtrage(F,x0,x1,x2);
     printf("%d %d %d | %d\n", x0, x1, x2, tab[i]);
     if (fichier != NULL){
-        fprintf(fichier, "%d | %d %d %d \n", tab[i],x0,x1,x2);
+        fprintf(fichier, "%d", tab[i]);
       }
   }
 
-
-
   affiche_cas_filtrage();
+  K_atk = attaque(tab,F);
+
   free(tab);//on libère la mémoire
   fclose(fichier);
   return 0;
