@@ -125,8 +125,8 @@ _Bool F[8];
 
 }
 
-void attaque_L2(_Bool cr[16], _Bool sc[32], _Bool F[8], _Bool * res){
-  _Bool init_L2[16], tmpSi[32];
+void attaque_L2(_Bool cr[16], _Bool sc[64], _Bool F[8], _Bool * res){
+  _Bool init_L2[16], tmpSi[64];
   LFSR tmpL2;
   int i,j,tmp, flag_Break;
   float nb_similitudes = 0.0;
@@ -140,11 +140,11 @@ void attaque_L2(_Bool cr[16], _Bool sc[32], _Bool F[8], _Bool * res){
     }
 
     tmpL2 = init_LFSR(cr,init_L2);
-    for(int lo = 0; lo<32; lo++){
+    for(int lo = 0; lo<64; lo++){
       tmpSi[lo] = calcul_LFSR(&tmpL2);
     }
     nb_similitudes = 0.0;
-    for(int glace_au_chocolat = 0; glace_au_chocolat<32; ++glace_au_chocolat){ //Compte les similitudes entre la suite chiffrante originelle
+    for(int glace_au_chocolat = 0; glace_au_chocolat<64; ++glace_au_chocolat){ //Compte les similitudes entre la suite chiffrante originelle
       if(sc[glace_au_chocolat] == tmpSi[glace_au_chocolat]) nb_similitudes ++; //et l'initialisation de L2
       // if(glace_au_chocolat == 24){ // Vérfie si nous en sommes à la 24e itération
       //   if(nb_similitudes < 17){ // Si on est a la 24e itération et qu'il y'a moins de 17 similitudes alors on sors.
@@ -154,10 +154,10 @@ void attaque_L2(_Bool cr[16], _Bool sc[32], _Bool F[8], _Bool * res){
       // }
     }
 
-    if((flag_Break == 0) && (((nb_similitudes/32.0)*100.0)>=75.0))
+    if((flag_Break == 0) && (((nb_similitudes/64.0)*100.0)>=75.0))
     {
-      for(int h = 0;h < 16; h++){
-        res[h] = init_L2[h];
+      for(int h = 0;h < 64; h++){
+        res[h] = tmpSi[h];
       }
       break;
     }
