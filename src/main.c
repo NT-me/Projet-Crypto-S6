@@ -5,9 +5,11 @@ int main(){
 
   fichier = fopen("suite_chiffrante.txt", "w");
   LFSR L0,L1,L2;//les 3 LFSR
-  int n = 50; // Taille de la suite chiffrante Si
+  int n = 32; // Taille de la suite chiffrante Si
   _Bool  x0, x1, x2;
   _Bool * tab; //tableau prenant la valeur de retour du filtrage(suite_chiffrante)
+  _Bool key_L2[16];
+
   tab = malloc(sizeof(_Bool)*n);
 
   // les 3 cléfs (k0,k1,k2)
@@ -32,6 +34,7 @@ int main(){
   L2 = init_LFSR(c2, K.k2);
 
 
+  printf("Suite Chiffrante :\n");
   int i;
   //fprintf(fichier, "y |x0 1 2 \n", tab[i],x2);
   for (i=0;i<n;i++){
@@ -39,14 +42,25 @@ int main(){
     x1 = calcul_LFSR(&L1);
     x2 = calcul_LFSR(&L2);
     tab[i] = filtrage(F,x0,x1,x2);
-    printf("%d %d %d | %d\n", x0, x1, x2, tab[i]);
+    printf("%d", x0, x1, x2, tab[i]);
     if (fichier != NULL){
         fprintf(fichier, "%d", tab[i]);
       }
   }
 
-  affiche_cas_filtrage();
-  K_atk = attaque(tab,F);
+  printf("\n");
+
+  // affiche_cas_filtrage();
+  // K_atk = attaque(tab,F);
+  attaque_L2(c2, tab, F, key_L2);
+
+
+  //printf("\n");
+  //printf("Possible clef de L2:\n");
+  for (int laurrianne = 15;laurrianne>=0;--laurrianne){
+    printf("%d", key_L2[laurrianne]);
+  }
+  printf("\n");
 
   free(tab);//on libère la mémoire
   fclose(fichier);
