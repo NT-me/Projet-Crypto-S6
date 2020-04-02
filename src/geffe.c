@@ -1,19 +1,27 @@
 #include "geffe.h"
 
+int pow(int a,int b){
+	int tmp=1;
+	for(int i = 1;i<b;i++){
+		tmp = a * tmp ;
+	}
+	return tmp;
+}
+
 LFSR init_LFSR(_Bool cr[16], _Bool sdc[16]){
   //initialise un lFSR
   int i;
   LFSR lres;
-  for(i=TAILLE-1;i>-1;i--){
-    lres.coef_ret[i] = cr[i];
-    lres.clef[i] = sdc[i];
+  for(i=TAILLE-1;i>-1;--i){
+    lres.coef_ret[TAILLE-1-i] = cr[i];
+    lres.clef[TAILLE-1-i] = sdc[i];
   }
   return lres;
 }
 
 CLEF init_clef(_Bool k0[16], _Bool k1[16], _Bool k2[16]){
   CLEF res;
-  for (int i=0; i<16; ++i){
+  for (int i=0; i<TAILLE; ++i){
     res.k0[i] = k0[i];
     res.k1[i] = k1[i];
     res.k2[i] = k2[i];
@@ -62,11 +70,11 @@ _Bool calcul_LFSR(LFSR * l){//POINTEUR car on change la valeur des l.clef[i]
         deb_lfsr = deb_lfsr ^ l->clef[i];
     }
   }
-  res = l->clef[15];
-  for(i=TAILLE-1;i>0;i--){//TAILLE -1 car on commence à 15 et i>0 car on finit à 1
-    l->clef[i] =l->clef[i-1];
+  res = l->clef[0];
+  for(i=0;i<15;i++){//TAILLE -1 car on commence à 15 et i>0 car on finit à 1
+    l->clef[i] =l->clef[i+1];
   }
-  l->clef[0] = deb_lfsr;
+  l->clef[15] = deb_lfsr;
 
   return res;
 }
@@ -164,76 +172,75 @@ void attaque_L2(_Bool cr[16], _Bool sc[64], _Bool F[8], _Bool * res){
   }
 }
 
-// void attaque_L0_L1(_Bool cr[16], _Bool sc[32], _Bool F[8],CLEF K,
-//    LFSR tmpL0, LFSR tmpL1, LFSR tmpL2){
-//   int i,j,k,cmp1 = 0,cmp2=0,tmp,cmpres=0;
-//   _Bool k0[16],k1[16],k0_sav[16],k1_sav[16];
-//   _Bool F[8] = {1,0,0,0,1,1,1,0};
-//   _Bool  x0, x1, x2;
-//   _Bool sortie_chiffrante[32];
-//
-//   for(i=0;i<16;i++){ // réduction du nombre de cas (environ 25%)
-//     if(L2[i] == sc[i]){
-//       k0[i] = !sc[i];
-//       k0_sav[i] = 1;
-//       k1_sav[i] = 1;
-//       k1[i] = L2[i];
-//       cmp1++;
-//       cmp2++;
-//     }
-//     else {
-//       k0_sav[i] = 0;
-//       k1_sav[i] = 0;
-//     }
-//   }
-//
-//   for(j=0;j<pow(2,16-cmp1);j++){// boucle cas k1
-//     tmp = j;
-//     for(i=15;i>-1;i--){// création k1
-//       if(k1_sav[i] == 0){//si la case i n'est pas initialisé
-//         k1[i] = tmp & 0x1 ;
-//         tmp = tmp >> 1 ;
-//       }
-//     }
-//     //lfsr 1 et 2
-//     for(i=0;i<16;i++){ //reduction des cas pour x0
-//       if (k1[i]==K.k2[i]){
-//         k0[i]=sc[i];
-//         k0_sav[i] = 1;
-//       }
-//     }
-//
-//     for(i=0;i<pow(2,16-cmp2);i++){ //pour chaque
-//       tmp = i;
-//       for(k=15;k>-1;k--){ // création de k0
-//         if(k0_sav[i] == 0){
-//           k0[k] = tmp & 0x1 ;
-//           tmp = tmp >> 1 ;
-//         } // Extraire Sortie chiffrante et comparaison avec suite chiffrante
-//       }
-//       //init des LFSR avec les cléfs temporaire
-//       tmpL0 = init_LFSR(tmpL0.c0, k0);
-//       tmpL1 = init_LFSR(tmpL1.c1, k1);
-//       tmpL2 = init_LFSR(tmpL2.c2, K.k2);
-//       cmpres=0;
-//       for(k=0;k<32;k++){
-//         x0 = calcul_LFSR(&tmpL0);
-//         x1 = calcul_LFSR(&tmpL1);
-//         x2 = calcul_LFSR(&tmpL2);
-//         sortie_chiffrante[i]=filtrage(F,x0,x1,x2);
-//         if(sortie_chiffrante[i] == sc[i])
-//         cmpres++;
-//       }
-//       if(cmpres == 32){
-//         for(k=0;k<16;k++){
-//           K.k0 = k0;
-//           K.k1 = k1;
-//
-//         }
-//       }
-//     }
-//   }
-// }
+void attaque_L0_L1(_Bool cr[16], _Bool sc[32], _Bool F[8],CLEF K, LFSR tmpL0, LFSR tmpL1, LFSR tmpL2){
+  int i,j,k,cmp1 = 0,cmp2=0,tmp,cmpres=0;
+  _Bool k0[16],k1[16],k0_sav[16],k1_sav[16];
+
+  _Bool  x0, x1, x2;
+  _Bool sortie_chiffrante[32];
+
+  for(i=0;i<16;i++){ // réduction du nombre de cas (environ 25%)
+    if(K.k2[i] == sc[i]){
+      k0[i] = !sc[i];
+      k0_sav[i] = 1;
+      k1_sav[i] = 1;
+      k1[i] = K.k2[i];
+      cmp1++;
+      cmp2++;
+    }
+    else {
+      k0_sav[i] = 0;
+      k1_sav[i] = 0;
+    }
+  }
+
+  for(j=0;j<pow(2,16-cmp1);j++){// boucle cas k1
+    tmp = j;
+    for(i=15;i>-1;i--){// création k1
+      if(k1_sav[i] == 0){//si la case i n'est pas initialisé
+        k1[i] = tmp & 0x1 ;
+        tmp = tmp >> 1 ;
+      }
+    }
+    //lfsr 1 et 2
+    for(i=0;i<16;i++){ //reduction des cas pour x0
+      if (k1[i]==K.k2[i]){
+        k0[i]=sc[i];
+        k0_sav[i] = 1;
+      }
+    }
+
+    for(i=0;i<pow(2,16-cmp2);i++){ //pour chaque
+      tmp = i;
+      for(k=15;k>-1;k--){ // création de k0
+        if(k0_sav[i] == 0){
+          k0[k] = tmp & 0x1 ;
+          tmp = tmp >> 1 ;
+        } // Extraire Sortie chiffrante et comparaison avec suite chiffrante
+      }
+      //init des LFSR avec les cléfs temporaire
+      tmpL0 = init_LFSR(tmpL0.coef_ret, k0);
+      tmpL1 = init_LFSR(tmpL1.coef_ret, k1);
+      tmpL2 = init_LFSR(tmpL2.coef_ret, K.k2);
+      cmpres=0;
+      for(k=0;k<32;k++){
+        x0 = calcul_LFSR(&tmpL0);
+        x1 = calcul_LFSR(&tmpL1);
+        x2 = calcul_LFSR(&tmpL2);
+        sortie_chiffrante[i]=filtrage(F,x0,x1,x2);
+        if(sortie_chiffrante[i] == sc[i])
+        cmpres++;
+      }
+      if(cmpres == 32){
+        for(k=0;k<16;k++){
+          K.k0[k] = k0[k];
+          K.k1[k] = k1[k];
+
+        }
+      }
+    }
+  }
+}
 
 CLEF attaque(_Bool cr[16], _Bool sc[32], _Bool F[8]){
   CLEF res;

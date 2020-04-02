@@ -1,5 +1,5 @@
 rc:
-	gcc -o main src/*.c -ggdb -Wall
+	gcc -o main src/*.c -ggdb
 	./main
 
 compil:
