@@ -39,29 +39,29 @@ int main(){
   // printf("\n");
 
 
-  printf("L0: ");
-  for (int iL0=0; iL0<n; ++iL0){
-    x0 = calcul_LFSR(&L0);
-    if(iL0%16==0){
-      printf(" | ");
-    }
-    printf("%d", x0);
-
-  }
-  printf("\n");
-
-  printf("L1: ");
-  for (int iL1=0; iL1<n; ++iL1){
-    x1 = calcul_LFSR(&L1);
-    if(iL1%16==0){
-      printf(" | ");
-    }
-    printf("%d", x1);
-
-  }
-  printf("\n");
-
-
+  // printf("L0: ");
+  // for (int iL0=0; iL0<n; ++iL0){
+  //   x0 = calcul_LFSR(&L0);
+  //   if(iL0%16==0){
+  //     printf(" | ");
+  //   }
+  //   printf("%d", x0);
+  //
+  // }
+  // printf("\n");
+  //
+  // printf("L1: ");
+  // for (int iL1=0; iL1<n; ++iL1){
+  //   x1 = calcul_LFSR(&L1);
+  //   if(iL1%16==0){
+  //     printf(" | ");
+  //   }
+  //   printf("%d", x1);
+  //
+  // }
+  // printf("\n");
+  //
+  //
   printf("L2: ");
   for (int iL2=0; iL2<n; ++iL2){
     x2 = calcul_LFSR(&L2);
@@ -74,46 +74,23 @@ int main(){
   printf("\n");
 
 
-  // printf("SC:");
-  // int i;
-  // //fprintf(fichier, "y |x0 1 2 \n", tab[i],x2);
-  // for (i=0;i<n;i++){
-  //   x0 = calcul_LFSR(&L0);
-  //   x1 = calcul_LFSR(&L1);
-  //   x2 = calcul_LFSR(&L2);
-  //   tab[i] = filtrage(F,x0,x1,x2);
-  //   printf("%d", tab[i]);
-  //   if (fichier != NULL){
-  //       fprintf(fichier, "%d", tab[i]);
-  //     }
-  // }
-  //
-  // printf("\n");
-  //
-  // // affiche_cas_filtrage();
-  // // K_atk = attaque(tab,F);
-  // attaque_L2(c2, tab, F, key_L2);
-  //
-  //
-  // //printf("\n");
-  // //printf("Possible clef de L2:\n");
-  // printf("AT:");
-  // for (int laurrianne = 0;laurrianne<64;++laurrianne){
-  //   printf("%d", key_L2[laurrianne]);
-  // }
-  // printf("\n");
-  //
-  // printf("L2:");
-  // int cmptbis = 0;
-  // L2 = init_LFSR(c2, K.k2);
-  // for(int cle = 0; cle <64; ++cle){
-  //   x0 = calcul_LFSR(&L2);
-  //   printf("%d", x0);
-  //   if(x0 == tab[i])
-  //   cmptbis++;
-  // }
-  // printf("\ncmptbis: %d \n",cmptbis);
-  //
+  printf("SC:");
+  int i;
+  //fprintf(fichier, "y |x0 1 2 \n", tab[i],x2);
+  for (i=0;i<n;i++){
+    x0 = calcul_LFSR(&L0);
+    x1 = calcul_LFSR(&L1);
+    x2 = calcul_LFSR(&L2);
+    tab[i] = filtrage(F,x0,x1,x2);
+    printf("%d", tab[i]);
+    if (fichier != NULL){
+        fprintf(fichier, "%d", tab[i]);
+      }
+  }
+
+  printf("\n");
+
+
 
 
   free(tab);//on libère la mémoire
