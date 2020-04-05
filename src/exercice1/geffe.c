@@ -133,10 +133,10 @@ _Bool F[8];
 
 }
 
-void attaque_L2(_Bool cr[16], _Bool sc[64], _Bool F[8], _Bool * res){
-  _Bool init_L2[16], tmpSi[64];
+int attaque(_Bool cr[16], _Bool sc[32], _Bool F[8], CLEF * res, LFSR L0, LFSR L1, LFSR L2){
+  _Bool init_L2[16], tmpSi[32];
   LFSR tmpL2;
-  int i,j,tmp, flag_Break;
+  int i,j,tmp, flag_Break,test;
   float nb_similitudes = 0.0;
 
   for(i=0;i<65536;++i){//les 2^16 cas
@@ -148,11 +148,11 @@ void attaque_L2(_Bool cr[16], _Bool sc[64], _Bool F[8], _Bool * res){
     }
 
     tmpL2 = init_LFSR(cr,init_L2);
-    for(int lo = 0; lo<64; lo++){
+    for(int lo = 0; lo<32; lo++){
       tmpSi[lo] = calcul_LFSR(&tmpL2);
     }
     nb_similitudes = 0.0;
-    for(int glace_au_chocolat = 0; glace_au_chocolat<64; ++glace_au_chocolat){ //Compte les similitudes entre la suite chiffrante originelle
+    for(int glace_au_chocolat = 0; glace_au_chocolat<32; ++glace_au_chocolat){ //Compte les similitudes entre la suite chiffrante originelle
       if(sc[glace_au_chocolat] == tmpSi[glace_au_chocolat]) nb_similitudes ++; //et l'initialisation de L2
       // if(glace_au_chocolat == 24){ // Vérfie si nous en sommes à la 24e itération
       //   if(nb_similitudes < 17){ // Si on est a la 24e itération et qu'il y'a moins de 17 similitudes alors on sors.
@@ -162,17 +162,23 @@ void attaque_L2(_Bool cr[16], _Bool sc[64], _Bool F[8], _Bool * res){
       // }
     }
 
-    if((flag_Break == 0) && (((nb_similitudes/64.0)*100.0)>=75.0))
+    if((flag_Break == 0) && (((nb_similitudes/32.0)*100.0)>=50.0))
     {
-      for(int h = 0;h < 64; h++){
-        res[h] = tmpSi[h];
+      for(int h = 0;h < 16; h++){//Copie pour passer la clé dans la fonction d'attaque de L0 et L1
+        res->k2[h] = tmpSi[h];
       }
-      break;
+			// float yolo = (nb_similitudes/32.0)*100.0;
+			// printf("similitude : %f \n", yolo);
+
+			test = attaque_L0_L1(sc,F,res,L0,L1,L2);
+
+			if(test == 1) return i; // Retourne le nombre d'itération si ça marche
     }
   }
+	return -1; // cas d'erreur
 }
 
-void attaque_L0_L1(_Bool cr[16], _Bool sc[32], _Bool F[8],CLEF K, LFSR tmpL0, LFSR tmpL1, LFSR tmpL2){
+int attaque_L0_L1( _Bool sc[32], _Bool F[8],CLEF * K, LFSR tmpL0, LFSR tmpL1, LFSR tmpL2){
   int i,j,k,cmp1 = 0,cmp2=0,tmp,cmpres=0;
   _Bool k0[16],k1[16],k0_sav[16],k1_sav[16];
 
@@ -180,11 +186,11 @@ void attaque_L0_L1(_Bool cr[16], _Bool sc[32], _Bool F[8],CLEF K, LFSR tmpL0, LF
   _Bool sortie_chiffrante[32];
 
   for(i=0;i<16;i++){ // réduction du nombre de cas (environ 25%)
-    if(K.k2[i] == sc[i]){
+    if(K->k2[i] == sc[i]){
       k0[i] = !sc[i];
       k0_sav[i] = 1;
       k1_sav[i] = 1;
-      k1[i] = K.k2[i];
+      k1[i] = K->k2[i];
       cmp1++;
       cmp2++;
     }
@@ -204,7 +210,7 @@ void attaque_L0_L1(_Bool cr[16], _Bool sc[32], _Bool F[8],CLEF K, LFSR tmpL0, LF
     }
     //lfsr 1 et 2
     for(i=0;i<16;i++){ //reduction des cas pour x0
-      if (k1[i]==K.k2[i]){
+      if (k1[i]==K->k2[i]){
         k0[i]=sc[i];
         k0_sav[i] = 1;
       }
@@ -221,7 +227,7 @@ void attaque_L0_L1(_Bool cr[16], _Bool sc[32], _Bool F[8],CLEF K, LFSR tmpL0, LF
       //init des LFSR avec les cléfs temporaire
       tmpL0 = init_LFSR(tmpL0.coef_ret, k0);
       tmpL1 = init_LFSR(tmpL1.coef_ret, k1);
-      tmpL2 = init_LFSR(tmpL2.coef_ret, K.k2);
+      tmpL2 = init_LFSR(tmpL2.coef_ret, K->k2);
       cmpres=0;
       for(k=0;k<32;k++){
         x0 = calcul_LFSR(&tmpL0);
@@ -233,19 +239,13 @@ void attaque_L0_L1(_Bool cr[16], _Bool sc[32], _Bool F[8],CLEF K, LFSR tmpL0, LF
       }
       if(cmpres == 32){
         for(k=0;k<16;k++){
-          K.k0[k] = k0[k];
-          K.k1[k] = k1[k];
-
+          K->k0[k] = k0[k];
+          K->k1[k] = k1[k];
         }
+				return 1;
       }
     }
   }
-}
 
-CLEF attaque(_Bool cr[16], _Bool sc[32], _Bool F[8]){
-  CLEF res;
-
-  //attaque_L2(cr,sc,F,&res.k2); //Recherche de la clé d'initialisation de L2
-
-  return res;
+	return -1;
 }

@@ -41,12 +41,8 @@ _Bool calcul_LFSR(LFSR * l);
 
 void affiche_cas_filtrage();
 
-//Retrouve la clé d'intialisation de L2
-void attaque_L2(_Bool cr[16], _Bool sc[32], _Bool F[8], _Bool * res);
+//Permet de retrouver la clef d'init de L2 puis le test avec les autres LFSR
+int attaque(_Bool cr[16], _Bool sc[32], _Bool F[8], CLEF * res, LFSR L0, LFSR L1, LFSR L2);
 
 //Retrouve la clé d'initialisation de L0 et de L1.
-void attaque_L0_L1(_Bool cr[16], _Bool sc[32], _Bool F[8],CLEF K, LFSR tmpL0, LFSR tmpL1, LFSR tmpL2);
-
-// Fonction d'attaque qui prend la suite chiffrante et la fonction de filtrage en entrée
-// Elle renvoie la clef trouvée.
-CLEF attaque(_Bool cr[16], _Bool sc[32], _Bool F[8]);
+int attaque_L0_L1(_Bool sc[32], _Bool F[8],CLEF * K, LFSR tmpL0, LFSR tmpL1, LFSR tmpL2);

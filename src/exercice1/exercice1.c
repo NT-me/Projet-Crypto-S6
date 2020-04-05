@@ -5,10 +5,9 @@ int main(){
 
   fichier = fopen("suite_chiffrante.txt", "w");
   LFSR L0,L1,L2;//les 3 LFSR
-  int n = 32; // Taille de la suite chiffrante Si
+  int n = 32, val_ret_atk; // Taille de la suite chiffrante Si
   _Bool  x0, x1, x2;
   _Bool * tab; //tableau prenant la valeur de retour du filtrage(suite_chiffrante)
-  _Bool key_L2[64];
 
   tab = malloc(sizeof(_Bool)*n);
 
@@ -62,7 +61,7 @@ int main(){
   // printf("\n");
   //
   //
-  printf("L2: ");
+  printf("L2:");
   for (int iL2=0; iL2<n; ++iL2){
     x2 = calcul_LFSR(&L2);
     if(iL2%16==0){
@@ -73,6 +72,8 @@ int main(){
   }
   printf("\n");
 
+// Réinit de L2
+  L2 = init_LFSR(c2, K.k2);
 
   printf("SC:");
   int i;
@@ -82,15 +83,52 @@ int main(){
     x1 = calcul_LFSR(&L1);
     x2 = calcul_LFSR(&L2);
     tab[i] = filtrage(F,x0,x1,x2);
+    if(i%16==0){
+      printf(" | ");
+    }
     printf("%d", tab[i]);
     if (fichier != NULL){
         fprintf(fichier, "%d", tab[i]);
       }
   }
-
   printf("\n");
 
+  //initialisation des LFSR
+  L0 = init_LFSR(c0, K.k0);
+  L1 = init_LFSR(c1, K.k1);
+  L2 = init_LFSR(c2, K.k2);
 
+  val_ret_atk = attaque(c2, tab, F, &K_atk, L0, L1, L2);
+  if (val_ret_atk != -1){
+    printf("AT:");
+    // --- Affichage k0 ---
+    for (int atk0=0; atk0<n; ++atk0){
+      if(atk0%16==0){
+        printf(" | ");
+      }
+      printf("%d", K_atk.k0[atk0]);
+    }
+
+    // --- Affichage k1 ---
+    for (int atk1=0; atk1<n; ++atk1){
+      if(atk1%16==0){
+        printf(" | ");
+      }
+      printf("%d", K_atk.k1[atk1]);
+    }
+
+    // --- Affichage k2 ---
+    for (int atk2=0; atk2<n; ++atk2){
+      if(atk2%16==0){
+        printf(" | ");
+      }
+      printf("%d", K_atk.k2[atk2]);
+    }
+    printf("\nNb itérations: %d\n",val_ret_atk);
+  }
+  else{
+    printf("\nPas de clef trouvée\n");
+  }
 
 
   free(tab);//on libère la mémoire
