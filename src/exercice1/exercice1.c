@@ -5,16 +5,16 @@ int main(){
 
   fichier = fopen("suite_chiffrante.txt", "w");
   LFSR L0,L1,L2;//les 3 LFSR
-  int n = 32, val_ret_atk; // Taille de la suite chiffrante Si
+  int n = 128, val_ret_atk; // Taille de la suite chiffrante Si
   _Bool  x0, x1, x2;
   _Bool * tab; //tableau prenant la valeur de retour du filtrage(suite_chiffrante)
 
   tab = malloc(sizeof(_Bool)*n);
 
   // les 3 cléfs (k0,k1,k2)
-  _Bool k0[16] = {0, 1, 1, 0, 1, 0, 0,0,1,0,1,1,0,1,1,0},
-        k1[16] = {0, 1, 0, 1, 0, 0, 0,0,0,0,0,1,0,1,1,1},
-        k2[16] = {0, 1, 0, 1, 0, 0, 1,0,1,0,0,1,1,1,0,0};
+  _Bool k0[16] = {0, 0, 0, 0, 0, 0, 0,0,0,0,0,0,0,1,0,0},
+        k1[16] = {0, 0, 0, 0, 0, 0, 0,0,0,0,0,0,0,0,1,1},
+        k2[16] = {1, 0, 0, 0, 0, 0, 0,0,0,0,0,0,0,0,1,0};
   // les 3 coéfficients rétroactifs
   _Bool c0[16] = {0, 0, 0, 0, 0, 0, 0,0,1,0,0,1,0,0,1,1},
         c1[16] = {0, 0, 0, 0, 1, 0, 0,0,1,0,0,0,0,0,1,1},
@@ -26,6 +26,7 @@ int main(){
 
   CLEF K, K_atk;
   K = init_clef(k0,k1,k2);
+  _Bool K_vide [16] = {0, 0, 0, 0, 0, 0, 0,0,0,0,0,0,0,0,0,0};
 
   //initialisation des LFSR
   L0 = init_LFSR(c0, K.k0);
@@ -61,19 +62,35 @@ int main(){
   // printf("\n");
   //
   //
-  printf("L2:");
-  for (int iL2=0; iL2<n; ++iL2){
-    x2 = calcul_LFSR(&L2);
-    if(iL2%16==0){
-      printf(" | ");
-    }
-    printf("%d", x2);
+  // printf("L2:");
+  // for (int iL2=0; iL2<n; ++iL2){
+  //   x2 = calcul_LFSR(&L2);
+  //   if(iL2%16==0){
+  //     printf(" | ");
+  //   }
+  //   printf("%d", x2);
+  //
+  // }
+  // printf("\n");
 
+  for(int rem = 0; rem <16; ++rem){
+    L0.clef[rem] = K.k0[rem];
+    L1.clef[rem] = K.k1[rem];
+    L2.clef[rem] = K.k2[rem];
+  }
+
+  for(int coucou=0;coucou<16;++coucou){
+    printf("%d", L0.clef[coucou]);
   }
   printf("\n");
-
-// Réinit de L2
-  L2 = init_LFSR(c2, K.k2);
+  for(int coucou=0;coucou<16;++coucou){
+    printf("%d", L1.clef[coucou]);
+  }
+  printf("\n");
+  for(int coucou=0;coucou<16;++coucou){
+    printf("%d", L2.clef[coucou]);
+  }
+  printf("\n");
 
   printf("SC:");
   int i;
@@ -93,16 +110,16 @@ int main(){
   }
   printf("\n");
 
-  L0 = init_LFSR(c0, K.k0);
-  L1 = init_LFSR(c1, K.k1);
-  L2 = init_LFSR(c2, K.k2);
+  L0 = init_LFSR(c0, K_vide);
+  L1 = init_LFSR(c1, K_vide);
+  L2 = init_LFSR(c2, K_vide);
 
   for(int l = 0;l<16;l++)
     K_atk.k2[l] = k2[l];
 
   val_ret_atk = attaque_L0_L1(tab, F, &K_atk, L0, L1, L2);
   if (val_ret_atk != -1){
-    printf("AT:");
+    printf("\n\nAT:");
     // --- Affichage k0 ---
     printf("k0:\n");
     for (int atk0=0; atk0<16; ++atk0){

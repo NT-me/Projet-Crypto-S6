@@ -133,8 +133,8 @@ _Bool F[8];
 
 }
 
-int attaque(_Bool cr[16], _Bool sc[32], _Bool F[8], CLEF * res, LFSR L0, LFSR L1, LFSR L2){
-  _Bool init_L2[16], tmpSi[32];
+int attaque(_Bool cr[16], _Bool sc[128], _Bool F[8], CLEF * res, LFSR L0, LFSR L1, LFSR L2){
+  _Bool init_L2[16], tmpSi[128];
   LFSR tmpL2;
   int i,j,tmp, flag_Break,test;
   float nb_similitudes = 0.0;
@@ -148,11 +148,11 @@ int attaque(_Bool cr[16], _Bool sc[32], _Bool F[8], CLEF * res, LFSR L0, LFSR L1
     }
 
     tmpL2 = init_LFSR(cr,init_L2);
-    for(int lo = 0; lo<32; lo++){
+    for(int lo = 0; lo<128; lo++){
       tmpSi[lo] = calcul_LFSR(&tmpL2);
     }
     nb_similitudes = 0.0;
-    for(int glace_au_chocolat = 0; glace_au_chocolat<32; ++glace_au_chocolat){ //Compte les similitudes entre la suite chiffrante originelle
+    for(int glace_au_chocolat = 0; glace_au_chocolat<128; ++glace_au_chocolat){ //Compte les similitudes entre la suite chiffrante originelle
       if(sc[glace_au_chocolat] == tmpSi[glace_au_chocolat]) nb_similitudes ++; //et l'initialisation de L2
       // if(glace_au_chocolat == 24){ // Vérfie si nous en sommes à la 24e itération
       //   if(nb_similitudes < 17){ // Si on est a la 24e itération et qu'il y'a moins de 17 similitudes alors on sors.
@@ -162,7 +162,7 @@ int attaque(_Bool cr[16], _Bool sc[32], _Bool F[8], CLEF * res, LFSR L0, LFSR L1
       // }
     }
 
-    if((flag_Break == 0) && (((nb_similitudes/32.0)*100.0)>=70.0))
+    if((flag_Break == 0) && (((nb_similitudes/128.0)*100.0)>=50.0))
     {
       for(int h = 0;h < 16; h++){//Copie pour passer la clé dans la fonction d'attaque de L0 et L1
         res->k2[h] = tmpSi[h];
@@ -178,79 +178,159 @@ int attaque(_Bool cr[16], _Bool sc[32], _Bool F[8], CLEF * res, LFSR L0, LFSR L1
 	return -1; // cas d'erreur
 }
 
-int attaque_L0_L1( _Bool sc[32], _Bool F[8],CLEF * K, LFSR tmpL0, LFSR tmpL1, LFSR tmpL2){
-  int i,j,k,cmp1 = 0,cmp2=0,tmp,cmpres=0;
+int attaque_L0_L1( _Bool sc[128], _Bool F[8],CLEF * K, LFSR tmpL0, LFSR tmpL1, LFSR tmpL2){
+  int i,j,k,cmp0=0,cmp1,cmp2=0,tmp,cmpres=0;
   _Bool k0[16],k1[16],k0_sav[16],k1_sav[16];
 	LFSR tmpL0_,tmpL1_,tmpL2_;
 
   _Bool  x0, x1, x2;
-  _Bool sortie_chiffrante[32];
+  _Bool sortie_chiffrante[128];
 
-  for(i=0;i<16;i++){ // réduction du nombre de cas (environ 25%)
-    if(K->k2[i] == sc[i]){
-      k0[i] = !sc[i];
-      k0_sav[i] = 1;
-      k1_sav[i] = 1;
-      cmp1++;
-      cmp2++;
-    }
-    else {
-      k0_sav[i] = 0;
-      k1_sav[i] = 0;
-    }
-  }
+  // for(i=0;i<16;i++){ // réduction du nombre de cas (environ 25%)
+  //   if(K->k2[i] != sc[i]){
+  //     k0[i] = !sc[i];
+	// 		k1[i] = !sc[i];
+  //     k0_sav[i] = 1;
+  //     k1_sav[i] = 1;
+  //     cmp0++;
+  //     cmp2++;
+  //   }
+  //   else {
+  //     k0_sav[i] = 0;
+  //     k1_sav[i] = 0;
+  //   }
+  // }
 
-  for(j=0;j<pow(2,16-cmp1);j++){// boucle cas k1
+  for(j=0;j<pow(2,16);j++){// boucle cas k1
     tmp = j;
     for(i=15;i>-1;i--){// création k1
-      if(k1_sav[i] == 0){//si la case i n'est pas initialisé
-        k1[i] = tmp & 0x1 ;
-        tmp = tmp >> 1 ;
-      }
-    }
-    //lfsr 1 et 2
-    for(i=0;i<16;i++){ //reduction des cas pour x0
-      if (k1[i]==K->k2[i]){
-        k0[i]=sc[i];
-        k0_sav[i] = 1;
-      }
+      k1[i] = tmp & 0x1 ;
+      tmp = tmp >> 1 ;
     }
 
-    for(i=0;i<pow(2,16-cmp2);i++){ //pour chaque
-      tmp = i;
-      for(k=15;k>-1;k--){ // création de k0
-        if(k0_sav[i] == 0){
-          k0[k] = tmp & 0x1 ;
-          tmp = tmp >> 1 ;
-        } // Extraire Sortie chiffrante et comparaison avec suite chiffrante
-      }
-      //init des LFSR avec les cléfs temporaire
-      tmpL0_ = init_LFSR(tmpL0.coef_ret, k0);
-      tmpL1_ = init_LFSR(tmpL1.coef_ret, k1);
-      tmpL2_ = init_LFSR(tmpL2.coef_ret, K->k2);
+		//init le LFSR l1
+		for(int anti_inverse = 0; anti_inverse<16; ++anti_inverse){
+			tmpL1.clef[anti_inverse] = k1[anti_inverse];
+		}
 
-			tmpL0 = init_LFSR(tmpL0_.coef_ret, k0);
-      tmpL1 = init_LFSR(tmpL1_.coef_ret, k1);
-      tmpL2 = init_LFSR(tmpL2_.coef_ret, K->k2);
-      cmpres=0;
-      for(k=0;k<32;k++){
-        x0 = calcul_LFSR(&tmpL0);
-        x1 = calcul_LFSR(&tmpL1);
-        x2 = calcul_LFSR(&tmpL2);
-        sortie_chiffrante[k]=filtrage(F,x0,x1,x2);
-        if(sortie_chiffrante[k] == sc[k])
-        cmpres++;
-				printf("%d\n",cmpres );
-      }
-      if(cmpres == 32){
-        for(k=0;k<16;k++){
-          K->k0[k] = k0[k];
-          K->k1[k] = k1[k];
-        }
-				return 1;
-      }
-    }
-  }
+		// printf("Coef ret :");
+		// for(int f = 0;f<16;f++) printf("%d",tmpL1.coef_ret[f]);
+		// printf("\n");
 
-	return -1;
+		// printf("k1 :");
+		// for(int f = 0;f<16;f++) printf("%d",tmpL1.clef[f]);
+		// printf("\n");
+		//sleep(1);
+
+		//tour de lFSR l1
+		cmp1 = 0;
+		for(int kek = 0; kek < 128; kek++){
+			x1 = calcul_LFSR(&tmpL1);
+
+			//comparaison k1 sc
+			if(x1 == sc[i]){
+				cmp1++;
+			}
+		}
+
+
+	    //lfsr 1 et 2
+	    for(i=0;i<16;i++){ //reduction (50%) des cas pour x0
+	      if (k1[i]==K->k2[i]){
+	        k0[i]=!sc[i];
+	        k0_sav[i] = 1;
+	      }
+	    }
+
+	    for(i=0;i<pow(2,16-cmp2);i++){ //pour chaque
+				//if(j) printf("\n\n%d ::: %d\n",j,i);
+				//sleep(1);
+	      tmp = i;
+				//printf("remplissage k0:\n");
+	      for(k=15;k>-1;k--){ // création de k0
+	        //if(k0_sav[k] == 0){
+	          k0[k] = tmp & 0x1 ;
+						//printf("%d", k0[k]);
+	          tmp = tmp >> 1 ;
+	        //} // Extraire Sortie chiffrante et comparaison avec suite chiffrante
+	      }
+				//printf("\n");
+	      //init des LFSR avec les cléfs temporaire
+	      // tmpL0_ = init_LFSR(tmpL0.coef_ret, k0);
+	      // tmpL1_ = init_LFSR(tmpL1.coef_ret, k1);
+	      // tmpL2_ = init_LFSR(tmpL2.coef_ret, K->k2);
+				//
+				// tmpL0 = init_LFSR(tmpL0_.coef_ret, k0);
+	      // tmpL1 = init_LFSR(tmpL1_.coef_ret, k1);
+	      // tmpL2 = init_LFSR(tmpL2_.coef_ret, K->k2);
+
+				for(int anti_inverse = 0; anti_inverse<16; ++anti_inverse){
+					tmpL0.clef[anti_inverse] = k0[anti_inverse];
+					tmpL1.clef[anti_inverse] = k1[anti_inverse];
+					tmpL2.clef[anti_inverse] = K->k2[anti_inverse];
+				}
+
+				// printf("k0 tmpL0:");
+				// for(int klop = 0; klop<16; ++klop){
+				// 	printf("%d",tmpL0.clef[klop]);
+				// }
+				// printf("\n");
+				//
+				// printf("k1 tmpL1:");
+				// for(int klop = 0; klop<16; ++klop){
+				// 	printf("%d",tmpL1.clef[klop]);
+				// }
+				// printf("\n");
+				//
+				// printf("k2 tmpL2:");
+				// for(int klop = 0; klop<16; ++klop){
+				// 	printf("%d",tmpL2.clef[klop]);
+				// }
+				// printf("\n");
+
+	      cmpres=0;
+	      for(k=0;k<128;k++){
+	        x0 = calcul_LFSR(&tmpL0);
+	        x1 = calcul_LFSR(&tmpL1);
+	        x2 = calcul_LFSR(&tmpL2);
+	        sortie_chiffrante[k]=filtrage(F,x0,x1,x2);
+					//printf("%d =? %d\n", sortie_chiffrante[k], sc[k]);
+					//printf("%d", sortie_chiffrante[k]);
+	        if(sortie_chiffrante[k] == sc[k])
+	        cmpres++;
+	       }
+				//printf("\n%d\n",cmpres );
+
+				// if(j){
+				// 	printf("k0:\n");
+				// 	for(int glob = 0; glob<16; ++glob){
+				// 		printf("%d", k0[glob]);
+				// 	}
+				// 	printf("\n");
+				//
+				// 	printf("k1:\n");
+				// 	for(int glob = 0; glob<16; ++glob){
+				// 		printf("%d", k1[glob]);
+				// 	}
+				// 	printf("\n");
+				//
+				// 	printf("k2:\n");
+				// 	for(int glob = 0; glob<16; ++glob){
+				// 		printf("%d", K->k2[glob]);
+				// 	}
+				// 	printf("\n");
+				// }
+
+				//sleep(1);
+	      if(cmpres == 128){
+	        for(k=0;k<16;k++){
+	          K->k0[k] = k0[k];
+	          K->k1[k] = k1[k];
+	        }
+					return 1;
+	      }
+	    }
+ }
+
+ return -1;
 }
