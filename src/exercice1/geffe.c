@@ -162,7 +162,7 @@ int attaque(_Bool cr[16], _Bool sc[32], _Bool F[8], CLEF * res, LFSR L0, LFSR L1
       // }
     }
 
-    if((flag_Break == 0) && (((nb_similitudes/32.0)*100.0)>=50.0))
+    if((flag_Break == 0) && (((nb_similitudes/32.0)*100.0)>=70.0))
     {
       for(int h = 0;h < 16; h++){//Copie pour passer la clé dans la fonction d'attaque de L0 et L1
         res->k2[h] = tmpSi[h];
@@ -181,6 +181,7 @@ int attaque(_Bool cr[16], _Bool sc[32], _Bool F[8], CLEF * res, LFSR L0, LFSR L1
 int attaque_L0_L1( _Bool sc[32], _Bool F[8],CLEF * K, LFSR tmpL0, LFSR tmpL1, LFSR tmpL2){
   int i,j,k,cmp1 = 0,cmp2=0,tmp,cmpres=0;
   _Bool k0[16],k1[16],k0_sav[16],k1_sav[16];
+	LFSR tmpL0_,tmpL1_,tmpL2_;
 
   _Bool  x0, x1, x2;
   _Bool sortie_chiffrante[32];
@@ -190,7 +191,6 @@ int attaque_L0_L1( _Bool sc[32], _Bool F[8],CLEF * K, LFSR tmpL0, LFSR tmpL1, LF
       k0[i] = !sc[i];
       k0_sav[i] = 1;
       k1_sav[i] = 1;
-      k1[i] = K->k2[i];
       cmp1++;
       cmp2++;
     }
@@ -225,17 +225,22 @@ int attaque_L0_L1( _Bool sc[32], _Bool F[8],CLEF * K, LFSR tmpL0, LFSR tmpL1, LF
         } // Extraire Sortie chiffrante et comparaison avec suite chiffrante
       }
       //init des LFSR avec les cléfs temporaire
-      tmpL0 = init_LFSR(tmpL0.coef_ret, k0);
-      tmpL1 = init_LFSR(tmpL1.coef_ret, k1);
-      tmpL2 = init_LFSR(tmpL2.coef_ret, K->k2);
+      tmpL0_ = init_LFSR(tmpL0.coef_ret, k0);
+      tmpL1_ = init_LFSR(tmpL1.coef_ret, k1);
+      tmpL2_ = init_LFSR(tmpL2.coef_ret, K->k2);
+
+			tmpL0 = init_LFSR(tmpL0_.coef_ret, k0);
+      tmpL1 = init_LFSR(tmpL1_.coef_ret, k1);
+      tmpL2 = init_LFSR(tmpL2_.coef_ret, K->k2);
       cmpres=0;
       for(k=0;k<32;k++){
         x0 = calcul_LFSR(&tmpL0);
         x1 = calcul_LFSR(&tmpL1);
         x2 = calcul_LFSR(&tmpL2);
-        sortie_chiffrante[i]=filtrage(F,x0,x1,x2);
-        if(sortie_chiffrante[i] == sc[i])
+        sortie_chiffrante[k]=filtrage(F,x0,x1,x2);
+        if(sortie_chiffrante[k] == sc[k])
         cmpres++;
+				printf("%d\n",cmpres );
       }
       if(cmpres == 32){
         for(k=0;k<16;k++){

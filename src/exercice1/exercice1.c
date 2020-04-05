@@ -93,8 +93,46 @@ int main(){
   }
   printf("\n");
 
-  //initialisation des LFSR
   L0 = init_LFSR(c0, K.k0);
+  L1 = init_LFSR(c1, K.k1);
+  L2 = init_LFSR(c2, K.k2);
+
+  for(int l = 0;l<16;l++)
+    K_atk.k2[l] = k2[l];
+
+  val_ret_atk = attaque_L0_L1(tab, F, &K_atk, L0, L1, L2);
+  if (val_ret_atk != -1){
+    printf("AT:");
+    // --- Affichage k0 ---
+    printf("k0:\n");
+    for (int atk0=0; atk0<16; ++atk0){
+      printf("%d", K_atk.k0[atk0]);
+    }
+    printf("\n");
+
+
+    // --- Affichage k1 ---
+    printf("k1:\n");
+    for (int atk1=0; atk1<16; ++atk1){
+      printf("%d", K_atk.k1[atk1]);
+    }
+    printf("\n");
+
+
+    // --- Affichage k2 ---
+    printf("k2:\n");
+    for (int atk2=0; atk2<16; ++atk2){
+      printf("%d", K_atk.k2[atk2]);
+    }
+    printf("\n");
+    printf("\nNb itérations: %d\n",val_ret_atk);
+  }
+  else{
+    printf("\nPas de clef trouvée\n");
+  }
+
+  //initialisation des LFSR
+  /*L0 = init_LFSR(c0, K.k0);
   L1 = init_LFSR(c1, K.k1);
   L2 = init_LFSR(c2, K.k2);
 
@@ -128,7 +166,7 @@ int main(){
   }
   else{
     printf("\nPas de clef trouvée\n");
-  }
+  }*/
 
 
   free(tab);//on libère la mémoire
