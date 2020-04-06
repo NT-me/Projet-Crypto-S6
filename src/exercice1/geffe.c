@@ -203,20 +203,20 @@ int attaque_L0_L1( _Bool sc[128], _Bool F[8],CLEF * K, LFSR tmpL0, LFSR tmpL1, L
 	// }
 
  // A revoir cause des erreurs
-  for(i=0;i<16;i++){ // réduction du nombre de cas (environ 25%)
-    if(K->k2[i] != sc[i]){
-      k0[i] = !sc[i];
-			k1[i] = !sc[i];
-      k0_sav[i] = 1;
-      k1_sav[i] = 1;
-      cmp0++;
-      cmp2++;
-    }
-    else {
-      k0_sav[i] = 0;
-      k1_sav[i] = 0;
-    }
-  }
+  // for(i=0;i<16;i++){ // réduction du nombre de cas (environ 25%)
+  //   if(K->k2[i] != sc[i]){
+  //     k0[i] = !sc[i];
+	// 		k1[i] = !sc[i];
+  //     k0_sav[i] = 1;
+  //     k1_sav[i] = 1;
+  //     cmp0++;
+  //     cmp2++;
+  //   }
+  //   else {
+  //     k0_sav[i] = 0;
+  //     k1_sav[i] = 0;
+  //   }
+  // }
 
   for(j=0;j<pow(2,16);j++){// boucle cas k1
     tmp = j;
@@ -246,10 +246,10 @@ int attaque_L0_L1( _Bool sc[128], _Bool F[8],CLEF * K, LFSR tmpL0, LFSR tmpL1, L
 		//printf("%d\n",j);
 			//lfsr 1 et 2
 			for(i=0;i<16;i++){ //reduction (50%) des cas pour x0
-				if (k1[i]==K->k2[i]){
+				// if (k1[i]==K->k2[i]){
 					k0[i]=!sc[i];
-					k0_sav[i] = 1;
-				}
+					// k0_sav[i] = 1;
+				// }
 			}
 // --------------------- K0 ---------------------
 			for(i=0;i<pow(2,16-cmp2);i++){ //pour chaque k0
