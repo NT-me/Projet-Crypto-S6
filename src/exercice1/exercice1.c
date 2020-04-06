@@ -12,13 +12,13 @@ int main(){
   tab = malloc(sizeof(_Bool)*n);
 
   // les 3 cléfs (k0,k1,k2)
-  _Bool k0[16] = {0, 0, 0, 0, 0, 0, 0,0,0,0,0,0,0,1,0,0},
-        k1[16] = {0, 0, 0, 0, 0, 0, 0,0,0,0,0,0,0,0,1,1},
-        k2[16] = {1, 0, 0, 0, 0, 0, 0,0,0,0,0,0,0,0,1,0};
+  _Bool k0[16] = {1, 0, 0, 0, 0, 0, 0,0,0,0,0,0,0,0,0,1},
+        k1[16] = {0, 0, 0, 0, 0, 0, 0,0,0,0,0,0,1,0,0,0},
+        k2[16] = {0, 0, 0, 0, 0, 0, 0,0,0,0,0,1,0,0,1,0};
   // les 3 coéfficients rétroactifs
   _Bool c0[16] = {0, 0, 0, 0, 0, 0, 0,0,1,0,0,1,0,0,1,1},
         c1[16] = {0, 0, 0, 0, 1, 0, 0,0,1,0,0,0,0,0,1,1},
-        c2[16] = {0, 0, 0, 0, 0, 0, 0,0,0,0,1,0,1,1,0,1};
+        c2[16] = {0, 0, 0, 0, 0, 0, 0,0,0,0,0,1,1,1,0,1};
         //ci     15 14 13 12 11 10  9 8 7 6 5 4 3 2 1 0
 
   _Bool F[8] = {1,0,0,0,1,1,1,0};
@@ -26,7 +26,6 @@ int main(){
 
   CLEF K, K_atk;
   K = init_clef(k0,k1,k2);
-  _Bool K_vide [16] = {0, 0, 0, 0, 0, 0, 0,0,0,0,0,0,0,0,0,0};
 
   //initialisation des LFSR
   L0 = init_LFSR(c0, K.k0);
@@ -110,14 +109,8 @@ int main(){
   }
   printf("\n");
 
-  L0 = init_LFSR(c0, K_vide);
-  L1 = init_LFSR(c1, K_vide);
-  L2 = init_LFSR(c2, K_vide);
-
-  for(int l = 0;l<16;l++)
-    K_atk.k2[l] = k2[l];
-
-  val_ret_atk = attaque_L0_L1(tab, F, &K_atk, L0, L1, L2);
+  // val_ret_atk = attaque_L0_L1(tab, F, &K_atk, L0_A, L1_A, L2_A);
+  val_ret_atk = attaque(c2, tab, F, &K_atk, c0, c1, c1);
   if (val_ret_atk != -1){
     printf("\n\nAT:");
     // --- Affichage k0 ---
