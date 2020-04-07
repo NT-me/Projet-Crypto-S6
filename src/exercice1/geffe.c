@@ -145,7 +145,6 @@ int attaque(_Bool sc[128], _Bool F[8], CLEF * res, _Bool c0[16], _Bool c1[16], _
 	LFSR L2 = init_LFSR(c2, K_vide);
 
 		for(i=0;i<65536;++i){//les 2^16 cas
-			printf("%d\n",i);
 			tmp = i;
 			flag_Break = 0;
 			for(j=15;j>-1;j--){ // boucle pour convertir un entier i en binaire
@@ -178,7 +177,7 @@ int attaque(_Bool sc[128], _Bool F[8], CLEF * res, _Bool c0[16], _Bool c1[16], _
 					for(int h = 0;h < 16; h++){//Copie pour passer la clé dans la fonction d'attaque de L0 et L1
 					res->k2[h] = tmpSi[h];
 				}
-				printf("\nNouveau K2 en cours de test...\n");
+				printf("\nNouveau K2(%d) en cours de test...\n",i);
 
 				test = attaque_L0_L1(sc,F,res,L0,L1,tmpL2);
 				//printf("%d\n",test);
@@ -216,7 +215,7 @@ int attaque_L0_L1( _Bool sc[128], _Bool F[8],CLEF * K, LFSR tmpL0, LFSR tmpL1, L
       k1_sav[i] = 0;
     }
   }
-	printf("k1 %d\n",pow(2,16-cmp0));
+	printf("Nombre de K1 allant être tester : %d\n",pow(2,16-cmp0));
   for(j=0;j<pow(2,16-cmp0);j++){// boucle cas k1
 		//printf("%d\n",j);
     tmp = j;
