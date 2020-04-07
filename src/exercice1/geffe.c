@@ -133,7 +133,7 @@ _Bool F[8];
 
 }
 
-int attaque(_Bool cr[16], _Bool sc[128], _Bool F[8], CLEF * res, _Bool c0[16], _Bool c1[16], _Bool c2[16]){
+int attaque(_Bool sc[128], _Bool F[8], CLEF * res, _Bool c0[16], _Bool c1[16], _Bool c2[16]){
   _Bool init_L2[16], tmpSi[128];
 	_Bool K_vide [16] = {0, 0, 0, 0, 0, 0, 0,0,0,0,0,0,0,0,0,0};
   LFSR tmpL2;
@@ -145,6 +145,7 @@ int attaque(_Bool cr[16], _Bool sc[128], _Bool F[8], CLEF * res, _Bool c0[16], _
 	LFSR L2 = init_LFSR(c2, K_vide);
 
 		for(i=0;i<65536;++i){//les 2^16 cas
+			printf("%d\n",i);
 			tmp = i;
 			flag_Break = 0;
 			for(j=15;j>-1;j--){ // boucle pour convertir un entier i en binaire
@@ -152,7 +153,7 @@ int attaque(_Bool cr[16], _Bool sc[128], _Bool F[8], CLEF * res, _Bool c0[16], _
 				tmp = tmp >> 1 ;   //shift pour changer de position
 			}
 
-			tmpL2 = init_LFSR(cr,init_L2);
+			tmpL2 = init_LFSR(c2,init_L2);
 			for(int rp=0; rp<16;++rp){
 				tmpL2.clef[rp] = init_L2[rp];
 			}
@@ -164,12 +165,12 @@ int attaque(_Bool cr[16], _Bool sc[128], _Bool F[8], CLEF * res, _Bool c0[16], _
 			nb_similitudes = 0.0;
 			for(int glace_au_chocolat = 0; glace_au_chocolat<128; ++glace_au_chocolat){ //Compte les similitudes entre la suite chiffrante originelle
 				if(sc[glace_au_chocolat] == tmpSi[glace_au_chocolat]) nb_similitudes ++; //et l'initialisation de L2
-				// if(glace_au_chocolat == 24){ // Vérfie si nous en sommes à la 24e itération
-					//   if(nb_similitudes < 17){ // Si on est a la 24e itération et qu'il y'a moins de 17 similitudes alors on sors.
-					//     flag_Break = 1;
-					//     break;
-					//   }
-					// }
+				if(glace_au_chocolat == 83){ // Vérfie si nous en sommes à la 24e itération
+					  if(nb_similitudes < 53){ // Si on est a la 24e itération et qu'il y'a moins de 17 similitudes alors on sors.
+					    flag_Break = 1;
+					    break;
+					  }
+					}
 				}
 
 				if((flag_Break == 0) && (((nb_similitudes/128.0)*100.0)>=65))
@@ -203,8 +204,8 @@ int attaque_L0_L1( _Bool sc[128], _Bool F[8],CLEF * K, LFSR tmpL0, LFSR tmpL1, L
  // A revoir cause des erreurs
   for(i=0;i<16;i++){ // réduction du nombre de cas (environ 25%)
     if(K->k2[i] != sc[i]){
-      k0[i] = !sc[i];
-			k1[i] = !sc[i];
+      k0[i] = K->k2[i];
+			k1[i] = K->k2[i];
       k0_sav[i] = 1;
       k1_sav[i] = 1;
       cmp0++;
@@ -215,7 +216,7 @@ int attaque_L0_L1( _Bool sc[128], _Bool F[8],CLEF * K, LFSR tmpL0, LFSR tmpL1, L
       k1_sav[i] = 0;
     }
   }
-
+	printf("k1 %d\n",pow(2,16-cmp0));
   for(j=0;j<pow(2,16-cmp0);j++){// boucle cas k1
 		//printf("%d\n",j);
     tmp = j;
@@ -258,6 +259,7 @@ int attaque_L0_L1( _Bool sc[128], _Bool F[8],CLEF * K, LFSR tmpL0, LFSR tmpL1, L
 				}
 			}
 // --------------------- K0 ---------------------
+		//	printf("k0 %d\n",pow(2,16-cmp2));
 			for(i=0;i<pow(2,16-cmp2);i++){ //pour chaque k0
 				flag = 1;
 				tmp = i;
